@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react'; // Bổ sung import useEffect
 import { useNavigate, Link } from 'react-router-dom';
 import { authService } from '../../services/authService';
 
@@ -7,6 +7,14 @@ const Login = () => {
     const [credentials, setCredentials] = useState({ username: '', password: '' });
     const [error, setError] = useState('');
     const [isLoading, setIsLoading] = useState(false);
+
+    // THÊM ĐOẠN NÀY: Chặn truy cập trang Login nếu đã có Token
+    useEffect(() => {
+        const token = localStorage.getItem('access_token');
+        if (token) {
+            navigate('/home', { replace: true });
+        }
+    }, [navigate]);
 
     const handleChange = (e) => {
         setCredentials({ ...credentials, [e.target.name]: e.target.value });
@@ -19,10 +27,8 @@ const Login = () => {
 
         try {
             await authService.login(credentials.username, credentials.password);
-            // Lưu username để hiển thị trên trang Home
             localStorage.setItem('username', credentials.username);
             alert('Đăng nhập thành công!');
-            // Sử dụng replace: true để không lưu trong browser history
             navigate('/home', { replace: true }); 
         } catch (err) {
             setError('Sai tài khoản hoặc mật khẩu!');
